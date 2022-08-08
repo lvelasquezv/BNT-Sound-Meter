@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Main theme colors -->
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/teal_200</item>
+        <item name="colorPrimaryVariant">@color/teal_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!--Action bar style-->
+        <item name="android:actionBarStyle">@style/AppTheme.ActionBar</item>
+        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+        <!--backgroundcolors-->
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="android:alertDialogTheme">@style/AlertDialogTheme</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="android:buttonBarNeutralButtonStyle">@style/NeutralButtonStyle</item>
+        <item name="android:actionMenuTextColor">@color/white</item>
+        <item name="actionMenuTextColor">@color/white</item>
+    </style>
+
+    <style name="AppTheme.ActionBar" parent="Widget.AppCompat.Light.ActionBar">
+        <item name="android:titleTextStyle">@style/AppTheme.ActionBar.TitleText</item>
+        <item name="titleTextStyle">@style/AppTheme.ActionBar.TitleText</item>
+        <item name="android:subtitleTextStyle">@style/AppTheme.ActionBar.SubTitleText</item>
+        <item name="subtitleTextStyle">@style/AppTheme.ActionBar.SubTitleText</item>
+        <item name="android:actionMenuTextAppearance">@style/MyActionBar.MenuTextStyle</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="background">@color/gray_5</item>
+        <item name="android:height">0dp</item>
+        <item name="height">0dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.ActionBar.TitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
+
+    <style name="AppTheme.ActionBar.SubTitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="MyActionBar.MenuTextStyle" parent="android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="textColorAlertDialogListItem">@color/white</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/gray_1</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/gray_1</item>
+    </style>
+
+    <style name="NeutralButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/purple_500</item>
+    </style>
+
+    <!-- TAMAÑO DE LETRA PRINCIPAL-->
+    <style name="TextStyleMain42" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">42sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextStyleMain36" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">36sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextStyleMain30" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextStyleMain26" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextStyleMain22" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- TAMAÑO DE LETRA DE 18 SP-->
+    <style name="TextStyle18" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- TAMAÑO DE LETRA DE 16 SP-->
+    <style name="TextStyle16" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- TAMAÑO DE LETRA DE 14 SP-->
+    <style name="TextStyle14" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- TAMAÑO DE LETRA DE 12 SP-->
+    <style name="TextStyle12" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="SCBSwitch" parent="Theme.AppCompat.Light">
+        <!-- active thumb & track color (30% transparency) -->
+        <item name="colorControlActivated">@color/blue_2</item>
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">#f1f1f1</item>
+        <!-- inactive track color (30% transparency) -->
+        <item name="android:colorForeground">#42221f1f</item>
+        <item name="android:scaleY">0.9</item>
+        <item name="android:scaleX">0.9</item>
+    </style>
+
+    <style name="AppTheme.Picker" parent="Theme.AppCompat.Light.NoActionBar" >
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:scaleX">1.0</item>
+        <item name="android:scaleY">1.0</item>
+        <item name="android:colorControlNormal">@color/blue_2</item>
+    </style>
+
+    <style name="AppTheme.Picker2" parent="Theme.AppCompat.Light.NoActionBar" >
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:scaleX">1.0</item>
+        <item name="android:scaleY">1.0</item>
+        <item name="android:colorControlNormal">@color/blue_2</item>
+    </style>
+
+    <style name="MyCheckBox" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorControlNormal">@color/gray_1</item>   <!-- normal border color change as you wish -->
+        <item name="android:scaleX">1.2</item>
+        <item name="android:scaleY">1.2</item>
+    </style>
+
+
+</resources>

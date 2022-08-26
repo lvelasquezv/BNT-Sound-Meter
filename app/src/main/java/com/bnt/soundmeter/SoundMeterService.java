@@ -26,7 +26,7 @@ import androidx.core.app.NotificationCompat;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+//import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 
 public class SoundMeterService extends Service{
 
@@ -103,35 +103,34 @@ public class SoundMeterService extends Service{
     int intToReturn = 0;
 
     if (intent.getAction().equals(ACTION_START)) {
-
       Log.d(TAG, "SMS INIT");
-      runner = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try{
-
-            //https://stackoverflow.com/questions/54607665/why-audiorecord-is-not-recording-sound-when-device-fall-asleep-even-when-i-use-w/54608175#54608175
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
-
-            while (runner != null && !runner.isInterrupted()) {
-              try {
-                Thread.sleep(1000);
-                Log.i(TAG, "Tock");
-              } catch (InterruptedException e) {
-                Log.d(TAG, "InterruptedException: " + android.util.Log.getStackTraceString(e));
+      if(runner == null){
+        Log.d(TAG, "SMS START RUNNER THREAD");
+        runner = new Thread(new Runnable() {
+          @Override
+          public void run() {
+            try{
+              //https://stackoverflow.com/questions/54607665/why-audiorecord-is-not-recording-sound-when-device-fall-asleep-even-when-i-use-w/54608175#54608175
+              android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+              while (runner != null && !runner.isInterrupted()) {
+                try {
+                  Thread.sleep(1000);
+                  Log.i(TAG, "Tock");
+                } catch (InterruptedException e) {
+                  Log.d(TAG, "InterruptedException: " + android.util.Log.getStackTraceString(e));
+                }
+                mHandler.post(splDb);
               }
-              mHandler.post(splDb);
+            }catch(Exception e){
+              Log.d(TAG, "Error iniciando el audio recorder" + e.getMessage());
             }
-          }catch(Exception e){
-            Log.d(TAG, "Error iniciando el audio recorder" + e.getMessage());
           }
-        }
-      });
-      runner.start();
-      Log.d(TAG, "start runner()");
-      //intToReturn = START_STICKY;
-      intToReturn = START_NOT_STICKY;
-
+        });
+        runner.start();
+        Log.d(TAG, "start runner()");
+        //intToReturn = START_STICKY;
+        intToReturn = START_NOT_STICKY;
+      }
     }else if(intent.getAction().equals(ACTION_STOP)){
       Log.d(TAG, "SMS FINISH");
       stopRecorder();
@@ -192,7 +191,7 @@ public class SoundMeterService extends Service{
 
     Intent notificationIntent = new Intent(this, MainActivity.class);
     PendingIntent pendingIntent = PendingIntent.getActivity(this,
-      0, notificationIntent, 0);
+      0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
     NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
     Notification notification = notificationBuilder.setOngoing(true)
@@ -203,8 +202,7 @@ public class SoundMeterService extends Service{
       .setTicker("")
       .build();
 
-    startForeground(1, notification, FOREGROUND_SERVICE_TYPE_MICROPHONE);
-    //stopService();
+    startForeground(1, notification);
 
   }
 
@@ -254,6 +252,7 @@ public class SoundMeterService extends Service{
 
   public void stopRecorder() {
     if (mRecorder != null) {
+      Log.d(TAG, "SMS STOP RUNNER THREAD");
       try{
         runner.interrupt();
         runner = null;

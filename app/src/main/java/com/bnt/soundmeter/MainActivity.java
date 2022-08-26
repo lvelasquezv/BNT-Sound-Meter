@@ -1,17 +1,12 @@
 package com.bnt.soundmeter;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,22 +14,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
-import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
+import android.text.InputFilter;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.AlignmentSpan;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -52,12 +47,14 @@ public class MainActivity extends AppCompatActivity {
   String TAG = "MAIN";
   TextView textViewDB;
   TextView historyTV;
+  EditText etLimite;
 
   Thread thread;
 
   String momentoEvento;
   String historiaEvento;
   int eventos = 0;
+  Double limite = 70.0;
 
   Context context;
 
@@ -70,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
   public static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
   String[] PERMISSIONS = {
     Manifest.permission.RECORD_AUDIO,
-    Manifest.permission.MANAGE_EXTERNAL_STORAGE,
+//    Manifest.permission.MANAGE_EXTERNAL_STORAGE,
   };
 
   @Override
@@ -93,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     context = this.getApplicationContext();
-    MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
+    //MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
     //SI NO SE HAN CONCEDIDO LOS PERMISOS REQUERIDOS ENTONCES SOLICITELOS
     ActivityCompat.requestPermissions(this, PERMISSIONS,  REQUEST_RECORD_AUDIO_PERMISSION);
@@ -101,6 +99,9 @@ public class MainActivity extends AppCompatActivity {
 
     textViewDB = findViewById(R.id.MainTVDecibelesValue);
     historyTV = findViewById(R.id.MainTVhistoria);
+    etLimite = findViewById(R.id.MainETLimite);
+    etLimite.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "85")});
+
 
     LocalBroadcastManager.getInstance(context).registerReceiver(new BroadcastReceiver() {
       @SuppressLint("DefaultLocale")
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         Double splDb = intent.getDoubleExtra(SoundMeterService.EXTRA_SPLDB, 0);
         if(splDb.isNaN() || splDb.isInfinite()){splDb = 0.0;}
         //EVENTO DE RUIDO
-        if(splDb >= 80){
+        if(splDb >= limite){
           eventos ++;
           momentoEvento = "Evento " + eventos + ": " + String.format("%.0f", splDb) + " dB SPL " + getDate();
           Log.d("SMS",momentoEvento);
@@ -158,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
 
   public void onResume(){
     super.onResume();
-    startSMS();
   }
 
   public void onPause(){
@@ -166,9 +166,12 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public void onDestroy(){
+    Log.d(TAG, "MAIN ON DESTROY CALLED");
     unbindService(mConnection);
     mBound = false;
     stopSMS();
+    thread.interrupt();
+    thread = null;
     deleteCache(this.getApplicationContext());
     super.onDestroy();
   }
@@ -180,15 +183,17 @@ public class MainActivity extends AppCompatActivity {
       thread = new Thread(new Runnable() {
         @Override
         public void run() {
-          Log.d(TAG, "SE INICIA SERVICE INTENT");
-          Intent startServiceIntent = new Intent(context, SoundMeterService.class);
-          startServiceIntent.putExtra("EXTRA_INTENT_CALLER", "MAIN_ACTIVITY");
-          startServiceIntent.setAction(ACTION_START);
-          try {
-            //https://issuetracker.google.com/issues/76112072
-            context.startService(startServiceIntent);
-          }catch (Exception e){
-            Log.d(TAG,"ERROR EN INICIO DE SERVICIO " + e.getMessage());
+          if(!thread.isInterrupted()){
+            Log.d(TAG, "SE INICIA SERVICE INTENT");
+            Intent startServiceIntent = new Intent(context, SoundMeterService.class);
+            startServiceIntent.putExtra("EXTRA_INTENT_CALLER", "MAIN_ACTIVITY");
+            startServiceIntent.setAction(ACTION_START);
+            try {
+              //https://issuetracker.google.com/issues/76112072
+              context.startService(startServiceIntent);
+            }catch (Exception e){
+              Log.d(TAG,"ERROR EN INICIO DE SERVICIO " + e.getMessage());
+            }
           }
         }
       });
@@ -201,7 +206,8 @@ public class MainActivity extends AppCompatActivity {
     Intent stopServiceIntent = new Intent(context, SoundMeterService.class);
     stopServiceIntent.putExtra("EXTRA_INTENT_CALLER", "MAIN_ACTIVITY");
     stopServiceIntent.setAction(ACTION_STOP);
-    this.stopService(stopServiceIntent);
+    //this.stopService(stopServiceIntent);
+    context.startService(stopServiceIntent);
   }
 
   //FUNCION PARA ESCRIBIR TOAST CON TEXTO ALINEADO AL CENTRO
@@ -217,24 +223,28 @@ public class MainActivity extends AppCompatActivity {
   }
 
   //ACTUAL DATE
-  //TODO CHANGE GTM FOR ANOTHER TIME ZONES
+  //
+  //https://stackoverflow.com/questions/6014903/getting-gmt-time-with-android
   public static String getDate(){
-    Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("GMT-5"));
-    int ano = calendar.get(Calendar.YEAR);
-    int mes = calendar.get(Calendar.MONTH) + 1;
+
+    ZonedDateTime today = ZonedDateTime.now();
+    Log.d("MAIN", "ZDT : " + today);
+    String ano_string = String.valueOf(today.getYear());
+    int mes = today.getMonthValue();
     String mes_string;
-    if(mes <= 9){mes_string = "0"+ mes;}else{mes_string = String.valueOf(mes);}
-    int dia = calendar.get(Calendar.DAY_OF_MONTH);
+    if(mes <= 9){ mes_string = "0"+ mes;}else{  mes_string = String.valueOf(mes);}
+    int dia = today.getDayOfMonth();
     String dia_string;
     if(dia <= 9){dia_string = "0"+ dia;}else{dia_string = String.valueOf(dia);}
-    int hora = calendar.get(Calendar.HOUR_OF_DAY);
-    int min = calendar.get(Calendar.MINUTE);
+    String hora_string = String.valueOf(today.getHour());
+    int min = today.getMinute();
     String min_string;
     if(min <= 9){min_string = "0"+ min;}else{min_string = String.valueOf(min);}
-    int sec = calendar.get(Calendar.SECOND);
+    int sec = today.getSecond();
     String sec_string;
     if(sec <= 9){sec_string = "0"+ sec;}else{sec_string = String.valueOf(sec);}
-    return dia_string+"/"+mes_string+"/"+ano+" "+hora+":"+min_string+":"+sec_string;
+
+    return dia_string+"/"+mes_string+"/"+ano_string+" "+hora_string+":"+min_string+":"+sec_string;
   }
 
   public void deleteCache(Context context) {
@@ -262,6 +272,54 @@ public class MainActivity extends AppCompatActivity {
       return dir.delete();
     } else {
       return false;
+    }
+  }
+
+  public void smsStart(View view) {
+    Log.d(TAG, "Boton iniciar");
+    limite = Double.parseDouble(etLimite.getText().toString());
+    startSMS();
+  }
+
+  public void smsPause(View view) {
+    Log.d(TAG, "Boton Pause");
+    stopSMS();
+    thread.interrupt();
+    thread = null;
+  }
+
+  public void logErase(View view) {
+    Log.d(TAG, "Boton Borrar");
+    historiaEvento = null;
+    historyTV.setText("");
+  }
+
+  public class InputFilterMinMax implements InputFilter {
+
+    private int min, max;
+
+    public InputFilterMinMax(int min, int max) {
+      this.min = min;
+      this.max = max;
+    }
+
+    public InputFilterMinMax(String min, String max) {
+      this.min = Integer.parseInt(min);
+      this.max = Integer.parseInt(max);
+    }
+
+    @Override
+    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+      try {
+        int input = Integer.parseInt(dest.toString() + source.toString());
+        if (isInRange(min, max, input))
+          return null;
+      } catch (NumberFormatException nfe) { }
+      return "";
+    }
+
+    private boolean isInRange(int a, int b, int c) {
+      return b > a ? c >= a && c <= b : c >= b && c <= a;
     }
   }
 

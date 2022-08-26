@@ -40,15 +40,128 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/MainRLopciones"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MainLLBar">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnCount="3">
+
+            <Button
+                android:id="@+id/MainButtonStart"
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:backgroundTint="@color/gray_4"
+                android:text="INICIAR"
+                style="@style/TextStyle18"
+                android:onClick="smsStart"/>
+
+            <Button
+                android:id="@+id/MainButtonPause"
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:backgroundTint="@color/gray_4"
+                android:text="DETENER"
+                style="@style/TextStyle18"
+                android:onClick="smsPause"/>
+
+            <Button
+                android:id="@+id/MainButtonErase"
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:layout_column="2"
+                android:layout_columnWeight="1"
+                android:backgroundTint="@color/gray_4"
+                android:text="BORRAR"
+                style="@style/TextStyle18"
+                android:onClick="logErase"/>
+
+        </GridLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/MainRLlimiteEventos"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MainRLopciones">
+
+        <TextView
+            android:id="@+id/MainTVLimite"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:gravity="center"
+            android:text="Límite Eventos = "
+            style="@style/TextStyleMain22">
+
+        </TextView>
+
+        <EditText
+            android:id="@+id/MainETLimite"
+            style="@style/TextStyleMain26"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/MainTVLimite"
+            android:gravity="center"
+            android:hint="70"
+            android:inputType="number"
+            android:text="70"
+            android:textAlignment="center">
+
+        </EditText>
+
+        <TextView
+            android:id="@+id/MainTVDecibelesText10"
+            style="@style/TextStyleMain22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/MainETLimite"
+            android:gravity="bottom"
+            android:text="dB" />
+
+        <TextView
+            android:id="@+id/MainTVDecibelesText11"
+            style="@style/TextStyle12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/MainTVDecibelesText10"
+            android:gravity="bottom"
+            android:text=" SPL" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
         android:id="@+id/MainRLDecibeles"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/MainLLBar">
+        app:layout_constraintTop_toBottomOf="@+id/MainRLlimiteEventos">
 
         <TextView
             android:id="@+id/MainTVDecibelesValue"

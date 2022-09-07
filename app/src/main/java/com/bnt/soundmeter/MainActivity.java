@@ -150,12 +150,12 @@ public class MainActivity extends AppCompatActivity {
     }
   };
 
-
+/*
   @Override
   public void onBackPressed(){
-    super.onPause();
-    //super.onBackPressed();
+    super.onBackPressed();
   }
+ */
 
   public void onResume(){
     super.onResume();

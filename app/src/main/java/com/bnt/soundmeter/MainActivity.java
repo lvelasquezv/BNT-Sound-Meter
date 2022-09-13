@@ -150,28 +150,41 @@ public class MainActivity extends AppCompatActivity {
     }
   };
 
-/*
   @Override
   public void onBackPressed(){
-    super.onBackPressed();
+    Log.d(TAG, "onBackPressed INIT");
+    //super.onBackPressed();
+    moveTaskToBack(true);
   }
- */
+
 
   public void onResume(){
+    Log.d(TAG, "OnResume INIT");
     super.onResume();
   }
 
   public void onPause(){
+    Log.d(TAG, "OnPause INIT");
     super.onPause();
+    if (this.isFinishing()){
+      Log.d(TAG, "App is finishing");
+    }else{
+      Log.d(TAG, "App is not finishing");
+    }
   }
 
   public void onDestroy(){
-    Log.d(TAG, "MAIN ON DESTROY CALLED");
-    unbindService(mConnection);
-    mBound = false;
-    stopSMS();
-    thread.interrupt();
-    thread = null;
+    Log.d(TAG, "OnDestroy INIT");
+    try{
+      unbindService(mConnection);
+      mBound = false;
+      stopSMS();
+      thread.interrupt();
+      thread = null;
+    }catch(Exception e){
+      e.printStackTrace();
+    }
+
     deleteCache(this.getApplicationContext());
     super.onDestroy();
   }

@@ -12,13 +12,11 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
-
 
 import androidx.annotation.Nullable;
 
@@ -80,6 +78,17 @@ public class SoundMeterService extends Service{
   public static final String
     ACTION_SMS_BROADCAST = SoundMeterService.class.getName() + "SMSBroadcast",
     EXTRA_SPLDB = "EXTRA_SPLDB";
+
+  /*
+  //READ FRECUENCIES WITH FFT
+  int channelConfig = AudioFormat.CHANNEL_IN_MONO;    // Recording in mon
+  private DoubleFFT_1D fft;                           // The fft double array
+  private RealDoubleFFT transformer;
+  int blockSize = 256;                               // deal with this many samples at a time
+  int sampleRate = 8000;                             // Sample rate in Hz
+  public double frequency = 0.0;                      // the frequency given
+  RecordAudio recordTask;                             // Creates a Record Audio command
+   */
 
   @Override
   public void onCreate() {
@@ -197,7 +206,7 @@ public class SoundMeterService extends Service{
     Notification notification = notificationBuilder.setOngoing(true)
       .setContentTitle("")
       .setContentText("")
-      .setSmallIcon(R.drawable.noise)
+      .setSmallIcon(R.drawable.notification_icon)
       //.setContentIntent(pendingIntent)
       .setTicker("")
       .build();

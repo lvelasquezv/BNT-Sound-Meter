@@ -42,6 +42,7 @@
         <item name="android:textAlignment">center</item>
         <item name="android:gravity">center_horizontal</item>
         <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
     </style>
 
     <style name="AppTheme.ActionBar.SubTitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
@@ -49,6 +50,7 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:textAlignment">center</item>
         <item name="android:gravity">center</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
     </style>
 
     <style name="MyActionBar.MenuTextStyle" parent="android:style/TextAppearance.Holo.Widget.ActionBar.Title">
@@ -79,35 +81,42 @@
     <style name="TextStyleMain42" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">42sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
     <style name="TextStyleMain36" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">36sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
     <style name="TextStyleMain30" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">30sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
     <style name="TextStyleMain26" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">26sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
     <style name="TextStyleMain22" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TextStyleMain20" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
@@ -115,7 +124,7 @@
     <style name="TextStyle18" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
@@ -123,7 +132,7 @@
     <style name="TextStyle16" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
@@ -131,7 +140,7 @@
     <style name="TextStyle14" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 
@@ -139,7 +148,7 @@
     <style name="TextStyle12" parent="@android:style/TextAppearance.Medium">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:font">@font/josefinsansregular</item>
+        <item name="android:fontFamily">@font/opensansregular</item>
         <item name="android:textAlignment">center</item>
     </style>
 

@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
   String momentoEvento;
   String historiaEvento;
   int eventos = 0;
-  Double limite = 70.0;
+  Double limite = 50.0;
 
   Context context;
 

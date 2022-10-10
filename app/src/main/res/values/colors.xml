@@ -26,4 +26,25 @@
     <color name="colorPrimaryVariant">@color/teal_700</color>
     <color name="colorOnBackground">@color/black</color>
 
+
+    <!--COLORES BIO NANO TECH -->
+    <!-- BIO -->
+    <color name="SeaBlue">#036197</color>
+    <!-- NANO -->
+    <color name="BlueGreenNano">#049CBF</color>
+    <!-- TECH -->
+    <color name="TiffanyBlue">#01BDB2</color>
+    <!-- SAS -->
+    <color name="Eucalyptus">#47E0B4</color>
+    <!--COLORES BIO NANO TECH LOGO-->
+    <color name="AteneoBlue">#00466A</color>
+    <color name="DarkCerulean">#035582</color>
+    <color name="BlueMunsell">#028AAC</color>
+    <color name="TiffanyBlue2">#03AEA9</color>
+    <color name="Eucalyptus2">#47DBB0</color>
+    <color name="LightGreen">#85E8A2</color>
+    <color name="MediumTurquoise">#4AD5D2</color>
+    <!--LETRAS -->
+    <color name="Gray">#7B7B7B</color>
+
 </resources>

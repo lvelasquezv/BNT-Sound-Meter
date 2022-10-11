@@ -30,9 +30,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.Objects;
 
 import static com.bnt.soundmeter.SoundMeterService.ACTION_START;
 import static com.bnt.soundmeter.SoundMeterService.ACTION_STOP;
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
   String TAG = "MAIN";
   TextView textViewDB;
   TextView historyTV;
+  TextView frequencyTV;
   EditText etLimite;
 
   Thread thread;
@@ -73,10 +73,8 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    switch (requestCode){
-      case REQUEST_RECORD_AUDIO_PERMISSION:
-        permissionToRecordAccepted  = (grantResults[0] == PackageManager.PERMISSION_GRANTED);
-        break;
+    if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+      permissionToRecordAccepted = (grantResults[0] == PackageManager.PERMISSION_GRANTED);
     }
     if (!permissionToRecordAccepted) {
       finish();
@@ -89,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+    Log.d(TAG, "onCreate INIT");
+
     context = this.getApplicationContext();
 
     //MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
@@ -98,40 +98,47 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "PERMISOS CONECEDIDOS");
 
     textViewDB = findViewById(R.id.MainTVDecibelesValue);
+    frequencyTV = findViewById(R.id.MainTVHErtzValue);
     historyTV = findViewById(R.id.MainTVhistoria);
     etLimite = findViewById(R.id.MainETLimite);
-    etLimite.setFilters(new InputFilter[]{ new InputFilterMinMax("1", "85")});
+    etLimite.setFilters(new InputFilter[]{new InputFilterMinMax("1", "85")});
 
+    LocalBroadcastManager.getInstance(context).registerReceiver(soundMeterReceiver,
+      new IntentFilter(SoundMeterService.ACTION_SMS_BROADCAST));
 
-    LocalBroadcastManager.getInstance(context).registerReceiver(new BroadcastReceiver() {
-      @SuppressLint("DefaultLocale")
-      @Override
-      public void onReceive(Context context, Intent intent) {
+    bindService(new Intent(this, SoundMeterService.class), mConnection, Context.BIND_AUTO_CREATE);
+  }
 
-        Double splDb = intent.getDoubleExtra(SoundMeterService.EXTRA_SPLDB, 0);
-        if(splDb.isNaN() || splDb.isInfinite()){splDb = 0.0;}
-        //EVENTO DE RUIDO
-        if(splDb >= limite){
-          eventos ++;
-          momentoEvento = "Evento " + eventos + ": " + String.format("%.0f", splDb) + " dB SPL " + getDate();
-          Log.d("SMS",momentoEvento);
-          if(historiaEvento == null || historiaEvento.isEmpty()){
-            historiaEvento = momentoEvento;
-          }else{
-            historiaEvento += "\n" + momentoEvento;
-          }
-          makeToast(momentoEvento, context);
-          historyTV.setText(historiaEvento);
+  //RECEIVER PARA SPL & Hz
+  public BroadcastReceiver soundMeterReceiver = new BroadcastReceiver() {
+    @SuppressLint("DefaultLocale")
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      Double splDb = intent.getDoubleExtra(SoundMeterService.EXTRA_SPLDB, 0);
+      float frequency = intent.getFloatExtra(SoundMeterService.EXTRA_FREQ, 0);
+      if(splDb.isNaN() || splDb.isInfinite()){splDb = 0.0;}
+      //EVENTO DE RUIDO
+      if(splDb >= limite && frequency <= 1500.0f){
+        eventos ++;
+        momentoEvento = eventos + ": " + String.format("%.0f", splDb) + "dB, " + String.format("%.0f", frequency) + "Hz, " +getDate();
+        Log.d("SMS",momentoEvento);
+        if(historiaEvento == null || historiaEvento.isEmpty()){
+          historiaEvento = momentoEvento;
+        }else{
+          historiaEvento += "\n" + momentoEvento;
         }
-        Log.d("updateTv", String.format("%.0f", splDb) + " dB SPL");
-        textViewDB.setText(String.format("%.0f", splDb));
-
+        makeToast(momentoEvento, context);
+        historyTV.setText(historiaEvento);
       }
-    }, new IntentFilter(SoundMeterService.ACTION_SMS_BROADCAST));
+      Log.d("updateTv", String.format("%.0f", splDb) + " dB SPL & " + String.format("%.0f", frequency) + " Hz");
+      textViewDB.setText(String.format("%.0f", splDb));
+      frequencyTV.setText(String.format("%.0f", frequency));
+    }
+  };
 
-    bindService(new Intent(this,
-      SoundMeterService.class), mConnection, Context.BIND_AUTO_CREATE);
-
+  public void destroyReceiver(){
+    Log.d(TAG, "destroyReceiver INIT");
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(soundMeterReceiver);
   }
 
   private ServiceConnection mConnection = new ServiceConnection() {
@@ -145,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
+      Log.d(TAG, "onServiceDisconnected INIT");
       mBound = false;
       soundMeterService = null;
     }
@@ -175,23 +183,54 @@ public class MainActivity extends AppCompatActivity {
 
   public void onDestroy(){
     Log.d(TAG, "OnDestroy INIT");
-    try{
-      unbindService(mConnection);
-      mBound = false;
-      stopSMS();
-      thread.interrupt();
-      thread = null;
-    }catch(Exception e){
-      e.printStackTrace();
-    }
-
-    deleteCache(this.getApplicationContext());
+    detenerApp();
     super.onDestroy();
   }
 
+  //INICIO DE FUNCIONES PARA DETENER LA APLICACION
+  //DETENER EL MAIN THREAD
+  public void stopMainThread(){
+    if(thread != null && !thread.isInterrupted()){
+      try{
+        Log.d(TAG, "StopMainThread INIT");
+        thread.interrupt();
+        thread = null;
+      }catch(Exception e){
+        Log.d(TAG, "ERROR DETENIENDO THREAD " + Arrays.toString(e.getStackTrace()));
+      }
+    }
+  }
 
+  //UNBIND EL SERVICIO DE SOUND METER
+  public void unbindService(){
+    if(mBound){
+      Log.d(TAG, "unbindService INIT");
+      unbindService(mConnection);
+    }
+  }
+
+  //DETENER EL SOUND METER
+  public void stopSoundMeter(){
+    if(mBound) {
+      try {
+        Log.d(TAG, "stopSoundMeter INIT");
+        stopSMS();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void detenerApp(){
+    stopSoundMeter();
+    unbindService();
+    stopMainThread();
+    destroyReceiver();
+    deleteCache(this.getApplicationContext());
+  }
+
+  //INICIAR SOUND METER
   public void startSMS(){
-
     if (thread == null) {
       thread = new Thread(new Runnable() {
         @Override
@@ -215,11 +254,11 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  //ENVIAR SEÑAL PARA DETENER SOUND METER
   public void stopSMS(){
     Intent stopServiceIntent = new Intent(context, SoundMeterService.class);
     stopServiceIntent.putExtra("EXTRA_INTENT_CALLER", "MAIN_ACTIVITY");
     stopServiceIntent.setAction(ACTION_STOP);
-    //this.stopService(stopServiceIntent);
     context.startService(stopServiceIntent);
   }
 
@@ -236,10 +275,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   //ACTUAL DATE
-  //
   //https://stackoverflow.com/questions/6014903/getting-gmt-time-with-android
   public static String getDate(){
-
     ZonedDateTime today = ZonedDateTime.now();
     Log.d("MAIN", "ZDT : " + today);
     String ano_string = String.valueOf(today.getYear());
@@ -256,10 +293,11 @@ public class MainActivity extends AppCompatActivity {
     int sec = today.getSecond();
     String sec_string;
     if(sec <= 9){sec_string = "0"+ sec;}else{sec_string = String.valueOf(sec);}
-
-    return dia_string+"/"+mes_string+"/"+ano_string+" "+hora_string+":"+min_string+":"+sec_string;
+    //return dia_string+"/"+mes_string+"/"+ano_string+" "+hora_string+":"+min_string+":"+sec_string;
+    return dia_string+"/"+mes_string+" "+hora_string+":"+min_string+":"+sec_string;
   }
 
+  //INTENTO DE BORRAR EL CACHE DE LA APLICACION
   public void deleteCache(Context context) {
     try {
       File dir = context.getCacheDir();
@@ -274,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
   public boolean deleteDir(File dir) {
     if (dir != null && dir.isDirectory()) {
       String[] children = dir.list();
-      for (int i = 0; i < children.length; i++) {
+      for (int i = 0; i < Objects.requireNonNull(children).length; i++) {
         boolean success = deleteDir(new File(dir, children[i]));
         if (!success) {
           return false;
@@ -288,29 +326,31 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  //FUNCIONES DE LOS BOTONES
+  //INICIAR
   public void smsStart(View view) {
     Log.d(TAG, "Boton iniciar");
     limite = Double.parseDouble(etLimite.getText().toString());
     startSMS();
   }
 
+  //DETENER
   public void smsPause(View view) {
     Log.d(TAG, "Boton Pause");
     stopSMS();
-    thread.interrupt();
-    thread = null;
+    stopMainThread();
   }
 
+  //BORRAR
   public void logErase(View view) {
     Log.d(TAG, "Boton Borrar");
     historiaEvento = null;
     historyTV.setText("");
   }
 
-  public class InputFilterMinMax implements InputFilter {
-
+  //FILTRO PARA EL INGRESO DEL LIMITE DE MEDICION DE SPL
+  public static class InputFilterMinMax implements InputFilter {
     private int min, max;
-
     public InputFilterMinMax(int min, int max) {
       this.min = min;
       this.max = max;
@@ -327,7 +367,9 @@ public class MainActivity extends AppCompatActivity {
         int input = Integer.parseInt(dest.toString() + source.toString());
         if (isInRange(min, max, input))
           return null;
-      } catch (NumberFormatException nfe) { }
+      } catch (NumberFormatException nfe) {
+        nfe.printStackTrace();
+      }
       return "";
     }
 

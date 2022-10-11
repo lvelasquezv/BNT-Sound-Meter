@@ -24,7 +24,7 @@ import androidx.core.app.NotificationCompat;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-//import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+
 
 public class SoundMeterService extends Service{
 
@@ -36,18 +36,9 @@ public class SoundMeterService extends Service{
   public static String ACTION_START = "SMS_START";
   public static String ACTION_STOP = "SMS_STOP";
 
-  /////////////////////////////////////////////////////////////////
-  // Convenience constants
-  public static final int AMP_SILENCE = 0;
-  public static final int AMP_NORMAL_BREATHING = 10;
-  public static final int AMP_MOSQUITO = 20;
-  public static final int AMP_WHISPER = 30;
-  public static final int AMP_STREAM = 40;
-  public static final int AMP_QUIET_OFFICE = 50;
-  public static final int AMP_NORMAL_CONVERSATION = 60;
-  public static final int AMP_HAIR_DRYER = 70;
-  public static final int AMP_GARBAGE_DISPOSAL = 80;
+  Intent intent = new Intent(ACTION_SMS_BROADCAST);
 
+  /////////////////////////////////////////////////////////////////
   // PRIVATE CONSTANTS
   private static final double MAX_REPORTABLE_AMP = 32767.0;
   private static final double MAX_REPORTABLE_DB = 90.3087;
@@ -56,6 +47,7 @@ public class SoundMeterService extends Service{
   private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
   private MediaRecorder mRecorder;
+  private AudioRecord audioRecord;
 
   private static String fileName = null;
 
@@ -65,10 +57,13 @@ public class SoundMeterService extends Service{
       if(runner != null){
         if(!runner.isInterrupted()){
           startRecorder();
+          startAudioRecorder();
           soundDb(MAX_REPORTABLE_AMP);
+          getBufferRead();
+          sendBroadCast();
         }
       }
-    };
+    }
   };
   final Handler mHandler = new Handler();
 
@@ -77,40 +72,23 @@ public class SoundMeterService extends Service{
 
   public static final String
     ACTION_SMS_BROADCAST = SoundMeterService.class.getName() + "SMSBroadcast",
-    EXTRA_SPLDB = "EXTRA_SPLDB";
-
-  /*
-  //READ FRECUENCIES WITH FFT
-  int channelConfig = AudioFormat.CHANNEL_IN_MONO;    // Recording in mon
-  private DoubleFFT_1D fft;                           // The fft double array
-  private RealDoubleFFT transformer;
-  int blockSize = 256;                               // deal with this many samples at a time
-  int sampleRate = 8000;                             // Sample rate in Hz
-  public double frequency = 0.0;                      // the frequency given
-  RecordAudio recordTask;                             // Creates a Record Audio command
-   */
+    EXTRA_SPLDB = "EXTRA_SPLDB",
+    EXTRA_FREQ = "EXTRA_FREQ";
 
   @Override
   public void onCreate() {
     super.onCreate();
-
     createNotification();
-
     fileName = getExternalCacheDir().getAbsolutePath();
     fileName += null;
-
   }
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
-
     createNotification();
-
     fileName = getExternalCacheDir().getAbsolutePath();
     fileName += null;
-
     int intToReturn = 0;
-
     if (intent.getAction().equals(ACTION_START)) {
       Log.d(TAG, "SMS INIT");
       if(runner == null){
@@ -204,7 +182,7 @@ public class SoundMeterService extends Service{
 
     NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
     Notification notification = notificationBuilder.setOngoing(true)
-      .setContentTitle("")
+      .setContentTitle("Sound Meter")
       .setContentText("")
       .setSmallIcon(R.drawable.notification_icon)
       //.setContentIntent(pendingIntent)
@@ -213,16 +191,6 @@ public class SoundMeterService extends Service{
 
     startForeground(1, notification);
 
-  }
-
-  private void stopService(){
-    try {
-      Thread.sleep(5000);
-      stopForeground(true);
-      stopSelf();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   public void startRecorder(){
@@ -269,6 +237,7 @@ public class SoundMeterService extends Service{
         mRecorder.reset();    // set state to idle
         mRecorder.release();  // release resources back to the system
         mRecorder = null;
+        stopAudioRecorder();
       }catch(Exception e){
         Log.d(TAG, e.getMessage());
       }
@@ -307,8 +276,76 @@ public class SoundMeterService extends Service{
     double p = getAmplitude();
     Log.d("SoundDb", "Max Amplitude of recorder = " + p + " / reference sound pressure = " + ampl);
     double splDb = MAX_REPORTABLE_DB  + 20 * Math.log10(p / ampl);
-    Intent intent = new Intent(ACTION_SMS_BROADCAST);
     intent.putExtra(EXTRA_SPLDB, splDb);
+  }
+
+  public void sendBroadCast(){
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+  }
+
+
+  //FREQUENCIES
+  //https://stackoverflow.com/questions/16982623/android-app-to-record-sound-in-real-time-and-identify-frequency
+  int blockSize = 2048;// = 256;
+  private static final int RECORDER_SAMPLERATE = 8000;
+  private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
+  private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+  int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
+  int BytesPerElement = 2;
+
+  final short[] buffer = new short[blockSize];
+  final double[] toTransform = new double[blockSize];
+
+  public void startAudioRecorder(){
+    if(audioRecord == null){
+      try{
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
+          RECORDER_SAMPLERATE, RECORDER_CHANNELS,
+          RECORDER_AUDIO_ENCODING, BufferElements2Rec * BytesPerElement);
+        audioRecord.startRecording();
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void stopAudioRecorder(){
+    if(audioRecord != null){
+      try{
+        audioRecord.stop();
+        audioRecord.release();
+        audioRecord = null;
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void getBufferRead(){
+    audioRecord.read(buffer, 0, blockSize);
+    bufferToCalculate(buffer);
+  }
+
+  public void bufferToCalculate(short[] ...buffer){
+    float freq = calculate(RECORDER_SAMPLERATE, buffer[0]);
+    intent.putExtra(EXTRA_FREQ, freq);
+    Log.d(TAG,"FREQUENCIES = " + freq);
+  }
+
+
+  public static float calculate(int sampleRate, short [] audioData) {
+    int numSamples = audioData.length;
+    int numCrossing = 0;
+    for (int p = 0; p < numSamples-1; p++) {
+      if ((audioData[p] > 0 && audioData[p + 1] <= 0) ||
+        (audioData[p] < 0 && audioData[p + 1] >= 0)) {
+        numCrossing++;
+      }
+    }
+    float numSecondsRecorded = (float)numSamples/(float)sampleRate;
+    float numCycles = numCrossing/2;
+    float frequency = numCycles/numSecondsRecorded;
+
+    return frequency;
   }
 }

@@ -28,8 +28,8 @@
 
         <ImageView
             android:id="@+id/MainIVBNTLogo"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
             android:src="@drawable/bntlogografico">
@@ -111,19 +111,22 @@
 
         <TextView
             android:id="@+id/MainTVLimite"
+            style="@style/TextStyleMain20"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
             android:layout_alignParentStart="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Límite Eventos = "
-            style="@style/TextStyleMain22">
+            android:text="Límite Eventos = ">
 
         </TextView>
 
         <EditText
             android:id="@+id/MainETLimite"
-            style="@style/TextStyleMain26"
+            style="@style/TextStyleMain22"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_toEndOf="@+id/MainTVLimite"
@@ -158,103 +161,110 @@
     </RelativeLayout>
 
 
-    <RelativeLayout
-        android:id="@+id/MainRLDecibeles"
+    <GridLayout
+        android:id="@+id/MainGLdata"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="50dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:columnCount="2"
+        android:rowCount="1"
+        android:layout_marginTop="40dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/MainRLlimiteEventos">
 
-        <TextView
-            android:id="@+id/MainTVDecibelesValue"
-            style="@style/TextStyleMain42"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
-            android:text="0" />
+        <RelativeLayout
+            android:id="@+id/MainRLDecibeles"
+            android:layout_column="0"
+            android:layout_columnWeight="1"
+            android:layout_row="0"
+            android:layout_gravity="bottom">
 
-        <TextView
-            android:id="@+id/MainTVDecibelesText"
-            style="@style/TextStyleMain22"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/MainTVDecibelesValue"
-            android:gravity="bottom"
-            android:text="  dB" />
+            <TextView
+                android:id="@+id/MainTVDecibelesValue"
+                style="@style/TextStyleMain36"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:text="0" />
 
-        <TextView
-            android:id="@+id/MainTVDecibelesText2"
-            style="@style/TextStyle12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/MainTVDecibelesText"
-            android:gravity="bottom"
-            android:text=" SPL" />
+            <TextView
+                android:id="@+id/MainTVDecibelesText"
+                style="@style/TextStyleMain22"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toEndOf="@+id/MainTVDecibelesValue"
+                android:gravity="bottom"
+                android:text="  dB" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/MainTVDecibelesText2"
+                style="@style/TextStyle12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toEndOf="@+id/MainTVDecibelesText"
+                android:gravity="bottom"
+                android:text=" SPL" />
 
-    <RelativeLayout
-        android:id="@+id/MainRLHertz"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/MainRLDecibeles">
+        </RelativeLayout>
 
-        <TextView
-            android:id="@+id/MainTVHErtzValue"
-            style="@style/TextStyleMain26"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerInParent="true"
-            android:text="0" />
+        <RelativeLayout
+            android:id="@+id/MainRLHertz"
+            android:layout_column="1"
+            android:layout_columnWeight="1"
+            android:layout_row="0"
+            android:layout_gravity="bottom">
 
-        <TextView
-            android:id="@+id/MainTVHertzText"
-            style="@style/TextStyle18"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/MainTVHErtzValue"
-            android:gravity="bottom"
-            android:text="  Hz" />
+            <TextView
+                android:id="@+id/MainTVHErtzValue"
+                style="@style/TextStyleMain26"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:text="0" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/MainTVHertzText"
+                style="@style/TextStyle18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toEndOf="@+id/MainTVHErtzValue"
+                android:gravity="bottom"
+                android:text="   Hz" />
+
+        </RelativeLayout>
+
+    </GridLayout>
+
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_margin="8dp"
+        android:layout_height="200dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="50dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MainGLdata">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
             <TextView
                 android:id="@+id/MainTVhistoria"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textAlignment="center"
-                style="@style/TextStyle16">
+                style="@style/TextStyle14">
             </TextView>
-
         </LinearLayout>
     </ScrollView>
-
 
 
 

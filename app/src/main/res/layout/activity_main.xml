@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/MainIVBNTLogo"
             android:layout_centerInParent="true"
-            android:text="  BNT Sound Meter"
+            android:text=" Sound Meter"
             style="@style/TextStyle18">
 
         </TextView>
@@ -32,12 +32,33 @@
             android:layout_height="24dp"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
-            android:src="@drawable/bntlogografico">
+            android:src="@drawable/soundwhite">
 
         </ImageView>
 
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/MainLLBNTlogo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MainLLBar">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/bntlogo"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
+            android:onClick="goToBNTLink">
+        </ImageView>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/MainRLopciones"
@@ -45,10 +66,10 @@
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/MainLLBar">
+        app:layout_constraintTop_toBottomOf="@+id/MainLLBNTlogo">
 
         <GridLayout
             android:layout_width="match_parent"
@@ -104,7 +125,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="40dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -161,7 +182,7 @@
         android:orientation="horizontal"
         android:columnCount="2"
         android:rowCount="1"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="35dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/MainRLlimiteEventos">
@@ -207,7 +228,7 @@
         <RelativeLayout
             android:id="@+id/MainRLHertz"
             android:layout_column="1"
-            android:layout_columnWeight="1"
+            android:layout_columnWeight="2"
             android:layout_row="0"
             android:layout_gravity="bottom">
 
@@ -236,8 +257,9 @@
 
 
     <ScrollView
+        android:id="@+id/MainSVHistory"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
+        android:layout_height="200dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="50dp"

@@ -3,10 +3,15 @@ package com.bnt.soundmeter;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputFilter;
@@ -344,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
   //BORRAR
   public void logErase(View view) {
     Log.d(TAG, "Boton Borrar");
+    eventos = 0;
     historiaEvento = null;
     historyTV.setText("");
   }
@@ -376,6 +383,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean isInRange(int a, int b, int c) {
       return b > a ? c >= a && c <= b : c >= b && c <= a;
     }
+  }
+
+  public void goToBNTLink(View view){
+    String url = "https://www.bionanotechsas.com/";
+    Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
+    startActivity( browse );
   }
 
 }

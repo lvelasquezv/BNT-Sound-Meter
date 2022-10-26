@@ -2,12 +2,14 @@ package com.bnt.soundmeter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -19,17 +21,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AlignmentSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
 
   String TAG = "MAIN";
+
+  ConstraintLayout constraintLayout;
+
   TextView textViewDB;
   TextView historyTV;
   TextView frequencyTV;
@@ -63,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
   Double limite = 50.0;
 
   Context context;
+
+  Boolean cambiarLimite = true;
 
   SoundMeterService soundMeterService = null;
   SoundMeterService mService;
@@ -95,6 +107,9 @@ public class MainActivity extends AppCompatActivity {
 
     Log.d(TAG, "onCreate INIT");
 
+    constraintLayout = findViewById(R.id.constraintLayout);
+    setupUI(constraintLayout);
+
     context = this.getApplicationContext();
 
     //MainViewModel viewModel = new ViewModelProvider(this).get(MainViewModel.class);
@@ -108,6 +123,16 @@ public class MainActivity extends AppCompatActivity {
     historyTV = findViewById(R.id.MainTVhistoria);
     etLimite = findViewById(R.id.MainETLimite);
     etLimite.setFilters(new InputFilter[]{new InputFilterMinMax("1", "85")});
+    etLimite.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        EditText et = (EditText) view;
+        if( !cambiarLimite ){
+          String mensaje = "Detenga la aplicación para poder cambiar el límite de eventos";
+          makeToast(mensaje);
+        }
+      }
+    });
 
     LocalBroadcastManager.getInstance(context).registerReceiver(soundMeterReceiver,
       new IntentFilter(SoundMeterService.ACTION_SMS_BROADCAST));
@@ -133,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         }else{
           historiaEvento += "\n" + momentoEvento;
         }
-        makeToast(momentoEvento, context);
+        makeToast(momentoEvento);
         historyTV.setText(historiaEvento);
       }
       Log.d("updateTv", String.format("%.0f", splDb) + " dB SPL & " + String.format("%.0f", frequency) + " Hz");
@@ -171,12 +196,13 @@ public class MainActivity extends AppCompatActivity {
     moveTaskToBack(true);
   }
 
-
+  @Override
   public void onResume(){
     Log.d(TAG, "OnResume INIT");
     super.onResume();
   }
 
+  @Override
   public void onPause(){
     Log.d(TAG, "OnPause INIT");
     super.onPause();
@@ -187,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  @Override
   public void onDestroy(){
     Log.d(TAG, "OnDestroy INIT");
     detenerApp();
@@ -211,7 +238,11 @@ public class MainActivity extends AppCompatActivity {
   public void unbindService(){
     if(mBound){
       Log.d(TAG, "unbindService INIT");
-      unbindService(mConnection);
+      try{
+        unbindService(mConnection);
+      }catch(Exception e){
+        e.printStackTrace();
+      }
     }
   }
 
@@ -269,14 +300,15 @@ public class MainActivity extends AppCompatActivity {
   }
 
   //FUNCION PARA ESCRIBIR TOAST CON TEXTO ALINEADO AL CENTRO
-  public static void makeToast(String mensaje, Context ctx){
+  public void makeToast(String mensaje){
     Spannable centeredText = new SpannableString(mensaje);
     centeredText.setSpan(
       new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
       0, mensaje.length() - 1,
       Spannable.SPAN_INCLUSIVE_INCLUSIVE
     );
-    Toast toast = Toast.makeText(ctx,centeredText,Toast.LENGTH_SHORT);
+    centeredText.setSpan(new ForegroundColorSpan(Color.WHITE), 0, mensaje.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    Toast toast = Toast.makeText(this,centeredText,Toast.LENGTH_SHORT);
     toast.show();
   }
 
@@ -338,6 +370,10 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "Boton iniciar");
     limite = Double.parseDouble(etLimite.getText().toString());
     startSMS();
+
+    //SE PREVIENE LA EDICION DEL LIMITE PARA EVENTOS
+    cambiarLimite = false;
+    etLimite.setInputType(InputType.TYPE_NULL);
   }
 
   //DETENER
@@ -345,6 +381,10 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "Boton Pause");
     stopSMS();
     stopMainThread();
+
+    //SE PERMITE LA EDICION DEL LIMITE PARA EVENTOS
+    cambiarLimite = true;
+    etLimite.setInputType(InputType.TYPE_CLASS_NUMBER);
   }
 
   //BORRAR
@@ -390,6 +430,38 @@ public class MainActivity extends AppCompatActivity {
     Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
     startActivity( browse );
   }
+
+  //La siguientes dos funciones esconden el teclado cuando la pantalla es tocada
+  //...
+  public static void hideSoftKeyboard(Activity activity) {
+    InputMethodManager inputMethodManager =
+      (InputMethodManager) activity.getSystemService(
+        Activity.INPUT_METHOD_SERVICE);
+    if (inputMethodManager.isAcceptingText()) {
+      inputMethodManager.hideSoftInputFromWindow(
+        activity.getCurrentFocus().getWindowToken(),
+        0);
+    }
+  }
+
+  @SuppressLint("ClickableViewAccessibility")
+  public void setupUI(View view) {
+    // Set up touch listener for non-text box views to hide keyboard.
+    if (!(view instanceof EditText)) {
+      view.setOnTouchListener((v, event) -> {
+        hideSoftKeyboard(MainActivity.this);
+        return false;
+      });
+    }
+    //If a layout container, iterate over children and seed recursion.
+    if (view instanceof ViewGroup) {
+      for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+        View innerView = ((ViewGroup) view).getChildAt(i);
+        setupUI(innerView);
+      }
+    }
+  }
+  //...
 
 }
 

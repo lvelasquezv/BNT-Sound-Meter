@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="AlturaViews">54dp</dimen>
     <dimen name="AnchoBotones">100dp</dimen>
+    <dimen name="AlturaBotones">54dp</dimen>
     <dimen name="MargenBotones">5dp</dimen>
 </resources>

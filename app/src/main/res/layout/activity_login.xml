@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".login">
+
+    <LinearLayout
+        android:id="@+id/LogInLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="150dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sound Meter App"
+            style="@style/TextStyleMain26">
+        </TextView>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/LogInLLCedula"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="150dp"
+        android:orientation="horizontal"
+        android:background="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LogInLogo">
+
+        <EditText
+            android:id="@+id/id"
+            android:layout_width="250dp"
+            android:layout_height="@dimen/AlturaViews"
+            android:autofillHints=""
+            android:hint="Cedula de Ciudadania"
+            android:importantForAutofill="yes"
+            android:inputType="number"
+            android:minHeight="48dp"
+            android:completionThreshold="1"
+            android:backgroundTint="@color/white"
+            android:textColorHint="@color/white"
+            android:gravity="center"
+            style="@style/TextStyle18">
+        </EditText>
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="@dimen/AlturaViews"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/gray_4"
+        android:background="@drawable/round_shape_rect"
+        android:text="INGRESAR"
+        style="@style/TextStyleButtons"
+        android:onClick="loginButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/LogInLLCedula">
+
+    </Button>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

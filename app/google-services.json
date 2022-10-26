@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "32173725339",
+    "project_id": "sound-meter-48cd9",
+    "storage_bucket": "sound-meter-48cd9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32173725339:android:5ac1b3752e9340dc94d83e",
+        "android_client_info": {
+          "package_name": "com.bnt.soundmeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "32173725339-60pgm0et80ifa8sqgesbg6hsuh4djm32.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3cSFTQF1ChLV9oC5NXct-6_OjGNEuaoM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "32173725339-60pgm0et80ifa8sqgesbg6hsuh4djm32.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

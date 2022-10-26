@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:background="@color/black">
+
+    <RelativeLayout
+        android:id="@+id/MainLLBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text=" Sound Meter"
+            style="@style/TextStyle18">
+        </TextView>
+        <!--android:layout_toEndOf="@+id/MainIVBNTLogo"-->
+        <!--
+        <ImageView
+            android:id="@+id/MainIVBNTLogo"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerInParent="true"
+            android:src="@drawable/soundwhite">
+        </ImageView>
+        -->
+
+
+    </RelativeLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Si desea enviar el número de eventos a la base de datos, por favor ingrese su número de identificación y de clic en 'ENVIAR', de lo contrario de clic en 'CANCELAR'. Nota: su número de identificación será cifrado y solo será usado para fines del estudio del sueño"
+        style="@style/TextStyle18">
+    </TextView>
+    <EditText
+        android:id="@+id/idUser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:autofillHints=""
+        android:hint="Cedula de Ciudadania"
+        android:importantForAutofill="yes"
+        android:inputType="number"
+        android:minHeight="48dp"
+        android:completionThreshold="1"
+        android:backgroundTint="@color/white"
+        android:textColorHint="@color/gray_2"
+        android:gravity="center"
+        style="@style/TextStyle18"/>
+
+</LinearLayout>

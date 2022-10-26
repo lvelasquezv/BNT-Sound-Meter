@@ -1,13 +1,19 @@
 package com.bnt.soundmeter;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,6 +21,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -23,20 +30,32 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.AlignmentSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.io.File;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.bnt.soundmeter.SoundMeterService.ACTION_START;
@@ -50,17 +69,25 @@ public class MainActivity extends AppCompatActivity {
 
 
   String TAG = "MAIN";
+
+  ConstraintLayout constraintLayout;
+
   TextView textViewDB;
   TextView historyTV;
   TextView frequencyTV;
   EditText etLimite;
+  Boolean cambiarLimite = true;
 
   Thread thread;
 
   String momentoEvento;
   String historiaEvento;
-  int eventos = 0;
+  int evento = 0;
   Double limite = 50.0;
+  String fecha_sin, fecha_con;
+
+
+  Eventos eventos = new Eventos();
 
   Context context;
 
@@ -108,6 +135,30 @@ public class MainActivity extends AppCompatActivity {
     historyTV = findViewById(R.id.MainTVhistoria);
     etLimite = findViewById(R.id.MainETLimite);
     etLimite.setFilters(new InputFilter[]{new InputFilterMinMax("1", "85")});
+    etLimite.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        EditText et = (EditText) view;
+        if( !cambiarLimite ){
+          String mensaje = "Detenga la aplicación para poder cambiar el límite de eventos";
+          makeToast(mensaje);
+        }
+      }
+    });
+
+    constraintLayout = findViewById(R.id.constraintLayout);
+    setupUI(constraintLayout);
+
+    //OBTENER ID DE LOGIN
+    /*
+    Intent intent = getIntent();
+    String fromIntent = intent.getStringExtra("EXTRA_FROM_INTENT");
+    if(fromIntent.equals("LOGIN")){
+      Log.d(TAG, "From Intent = " + fromIntent);
+      Log.d(TAG, "User Identification = " + intent.getStringExtra("EXTRA_ID"));
+      eventos.setId(Objects.requireNonNull(intent.getStringExtra("EXTRA_ID")));
+    }
+     */
 
     LocalBroadcastManager.getInstance(context).registerReceiver(soundMeterReceiver,
       new IntentFilter(SoundMeterService.ACTION_SMS_BROADCAST));
@@ -125,15 +176,24 @@ public class MainActivity extends AppCompatActivity {
       if(splDb.isNaN() || splDb.isInfinite()){splDb = 0.0;}
       //EVENTO DE RUIDO
       if(splDb >= limite && frequency <= 1500.0f){
-        eventos ++;
-        momentoEvento = eventos + ": " + String.format("%.0f", splDb) + "dB, " + String.format("%.0f", frequency) + "Hz, " +getDate();
+
+        if(eventos.maxDb < splDb){ eventos.setMaxDb(splDb);  eventos.setFrec(frequency); }
+
+        fecha_sin = getDate(2);
+        fecha_con = getDate(1);
+        eventos.setInitialDate(fecha_con);
+        eventos.setLastDate(fecha_con);
+        evento ++;
+        eventos.addEventos();
+
+        momentoEvento = evento + ": " + String.format("%.0f", splDb) + "dB, " + String.format("%.0f", frequency) + "Hz, " + fecha_sin;
         Log.d("SMS",momentoEvento);
         if(historiaEvento == null || historiaEvento.isEmpty()){
           historiaEvento = momentoEvento;
         }else{
           historiaEvento += "\n" + momentoEvento;
         }
-        makeToast(momentoEvento, context);
+        makeToast(momentoEvento);
         historyTV.setText(historiaEvento);
       }
       Log.d("updateTv", String.format("%.0f", splDb) + " dB SPL & " + String.format("%.0f", frequency) + " Hz");
@@ -172,11 +232,13 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
+  @Override
   public void onResume(){
     Log.d(TAG, "OnResume INIT");
     super.onResume();
   }
 
+  @Override
   public void onPause(){
     Log.d(TAG, "OnPause INIT");
     super.onPause();
@@ -187,6 +249,19 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  @Override
+  protected void onStop() {
+    super.onStop();
+    Log.d(TAG, "onStop Init");
+  }
+
+  @Override
+  protected void onRestart() {
+    super.onRestart();
+    Log.d(TAG, "onRestart Init");
+  }
+
+  @Override
   public void onDestroy(){
     Log.d(TAG, "OnDestroy INIT");
     detenerApp();
@@ -211,7 +286,12 @@ public class MainActivity extends AppCompatActivity {
   public void unbindService(){
     if(mBound){
       Log.d(TAG, "unbindService INIT");
-      unbindService(mConnection);
+      try{
+        unbindService(mConnection);
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+
     }
   }
 
@@ -227,12 +307,15 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  //LLAMADO A FUNCIONES PARA DETENER SERVICIOS
   public void detenerApp(){
     stopSoundMeter();
     unbindService();
     stopMainThread();
     destroyReceiver();
-    deleteCache(this.getApplicationContext());
+    logMaxEventsFirebase(); //ENVIAR EVENTOS MAXIMOS AL LOG DE FIREBASE
+    eventos.setInit();
+    //deleteCache(this.getApplicationContext());
   }
 
   //INICIAR SOUND METER
@@ -269,20 +352,20 @@ public class MainActivity extends AppCompatActivity {
   }
 
   //FUNCION PARA ESCRIBIR TOAST CON TEXTO ALINEADO AL CENTRO
-  public static void makeToast(String mensaje, Context ctx){
+  public void makeToast(String mensaje){
     Spannable centeredText = new SpannableString(mensaje);
     centeredText.setSpan(
       new AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
       0, mensaje.length() - 1,
       Spannable.SPAN_INCLUSIVE_INCLUSIVE
     );
-    Toast toast = Toast.makeText(ctx,centeredText,Toast.LENGTH_SHORT);
+    Toast toast = Toast.makeText(this,centeredText,Toast.LENGTH_SHORT);
     toast.show();
   }
 
   //ACTUAL DATE
   //https://stackoverflow.com/questions/6014903/getting-gmt-time-with-android
-  public static String getDate(){
+  public static String getDate(int option){
     ZonedDateTime today = ZonedDateTime.now();
     Log.d("MAIN", "ZDT : " + today);
     String ano_string = String.valueOf(today.getYear());
@@ -299,10 +382,14 @@ public class MainActivity extends AppCompatActivity {
     int sec = today.getSecond();
     String sec_string;
     if(sec <= 9){sec_string = "0"+ sec;}else{sec_string = String.valueOf(sec);}
-    //return dia_string+"/"+mes_string+"/"+ano_string+" "+hora_string+":"+min_string+":"+sec_string;
-    return dia_string+"/"+mes_string+" "+hora_string+":"+min_string+":"+sec_string;
+    if(option == 1){
+      return dia_string+"/"+mes_string+"/"+ano_string+" "+hora_string+":"+min_string+":"+sec_string;
+    }else{
+      return dia_string+"/"+mes_string+" "+hora_string+":"+min_string+":"+sec_string;
+    }
   }
 
+  /*
   //INTENTO DE BORRAR EL CACHE DE LA APLICACION
   public void deleteCache(Context context) {
     try {
@@ -331,13 +418,23 @@ public class MainActivity extends AppCompatActivity {
       return false;
     }
   }
+   */
+
+  public void readLimit(){
+
+    limite = Double.parseDouble(etLimite.getText().toString());
+  }
 
   //FUNCIONES DE LOS BOTONES
   //INICIAR
   public void smsStart(View view) {
     Log.d(TAG, "Boton iniciar");
-    limite = Double.parseDouble(etLimite.getText().toString());
+    readLimit();
     startSMS();
+
+    //SE PREVIENE LA EDICION DEL LIMITE PARA EVENTOS
+    cambiarLimite = false;
+    etLimite.setInputType(InputType.TYPE_NULL);
   }
 
   //DETENER
@@ -345,14 +442,52 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "Boton Pause");
     stopSMS();
     stopMainThread();
+
+    //SE PERMITE LA EDICION DEL LIMITE PARA EVENTOS
+    cambiarLimite = true;
+    etLimite.setInputType(InputType.TYPE_CLASS_NUMBER);
   }
 
   //BORRAR
   public void logErase(View view) {
     Log.d(TAG, "Boton Borrar");
-    eventos = 0;
+    borrarRegistro();
+  }
+
+  public void borrarRegistro(){
+    evento = 0;
     historiaEvento = null;
     historyTV.setText("");
+  }
+
+  //ENVIAR & SALIR
+  public void buttonSend(View view){
+    //PAUSAR
+    stopSMS();
+    stopMainThread();
+    //ENVIAR DATOS A FIREBASE
+    askForID();
+    //BORRAR REGISTROS
+    borrarRegistro();
+  }
+
+  //SALIR
+  public void buttonExit(View view){
+    //SALIR DE LA APP
+    detenerApp();
+    moveTaskToBack(true);
+  }
+
+  //GO TO LOG IN ACTIVITY
+  public void goToLogIn(){
+    Intent intentLogIn = new Intent(this, login.class);
+    intentLogIn.putExtra("EXTRA_FROM_INTENT", "MAIN");
+    startActivity(intentLogIn);
+  }
+
+  @Override
+  public void onPointerCaptureChanged(boolean hasCapture) {
+    super.onPointerCaptureChanged(hasCapture);
   }
 
   //FILTRO PARA EL INGRESO DEL LIMITE DE MEDICION DE SPL
@@ -362,7 +497,6 @@ public class MainActivity extends AppCompatActivity {
       this.min = min;
       this.max = max;
     }
-
     public InputFilterMinMax(String min, String max) {
       this.min = Integer.parseInt(min);
       this.max = Integer.parseInt(max);
@@ -390,6 +524,117 @@ public class MainActivity extends AppCompatActivity {
     Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
     startActivity( browse );
   }
+
+
+  public void askForID() {
+    Log.d(TAG, eventos.toString());
+
+    AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyDialogTheme);
+    // Get the layout inflater
+    LayoutInflater inflater = this.getLayoutInflater();
+    View mView = inflater.inflate(R.layout.dialog_signin, null);
+    final EditText editTextID = (EditText) mView.findViewById(R.id.idUser);
+    // Inflate and set the layout for the dialog
+    // Pass null as the parent view because its going in the dialog layout
+    builder.setView(mView)
+      // Add action buttons
+      .setPositiveButton("ENVIAR", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int id) {
+          String userID = editTextID.getText().toString();
+          eventos.setId(userID);
+          sendDocToFirebase();
+        }
+      })
+      .setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int id) {
+          Log.d("ALERT DIALOG", "CANCEL");
+          //SALIR DE LA APP
+          detenerApp();
+          moveTaskToBack(true);
+        }
+      });
+    builder.show();
+  }
+
+
+  public void sendDocToFirebase(){
+    //ENVIAR DOCUMENTO SI HAY DATOS
+    if(eventos.hasData()) {
+      Log.d("FIREBASE", "EVIANDO DATOS A SERVIDOR...");
+      FirebaseFirestore db = FirebaseFirestore.getInstance();
+      Map<String, String> allDataValues = eventos.getData();
+      db.collection("DATOS_SM")
+        .add(allDataValues)
+        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+          @Override
+          public void onSuccess(DocumentReference documentReference) {
+            Log.d("FIREBASE", "DocumentSnapshot written with ID: " + documentReference.getId());
+          }
+        })
+        .addOnFailureListener(new OnFailureListener() {
+          @Override
+          public void onFailure(@NonNull Exception e) {
+            Log.d("FIREBASE", "Error adding document", e);
+          }
+        });
+    }else{
+      Log.d("FIREBASE", "SIN DATOS PARA EL ENVIO");
+    }
+    //SALIR DE LA APP
+    detenerApp();
+    moveTaskToBack(true);
+  }
+
+  //ENVIAR EVENTOS MAXIMOS (dB SPL maximo Y FRECUENCIA EN ESE MOMENTO) A FIREBASE
+  public void logMaxEventsFirebase(){
+    if(eventos.hasMaxs()){
+      Log.d("FIREBASE", "ENVIANDO EVENTOS MAXIMOS");
+      String db = String.valueOf(eventos.getMaxDb());
+      String frec = String.valueOf(eventos.getFrec());
+      FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+      Bundle params = new Bundle();
+      params.putString("dB", db);
+      params.putString("Frec", frec);
+      mFirebaseAnalytics.logEvent("max_values", params);
+    }else{
+      Log.d("FIREBASE","SIN EVENTOS MAXIMOS");
+    }
+  }
+
+
+  //La siguientes dos funciones esconden el teclado cuando la pantalla es tocada
+  //...
+  public static void hideSoftKeyboard(Activity activity) {
+    InputMethodManager inputMethodManager =
+      (InputMethodManager) activity.getSystemService(
+        Activity.INPUT_METHOD_SERVICE);
+    if (inputMethodManager.isAcceptingText()) {
+      inputMethodManager.hideSoftInputFromWindow(
+        activity.getCurrentFocus().getWindowToken(),
+        0);
+    }
+  }
+
+  @SuppressLint("ClickableViewAccessibility")
+  public void setupUI(View view) {
+    // Set up touch listener for non-text box views to hide keyboard.
+    if (!(view instanceof EditText)) {
+      view.setOnTouchListener((v, event) -> {
+        hideSoftKeyboard(MainActivity.this);
+        return false;
+      });
+    }
+    //If a layout container, iterate over children and seed recursion.
+    if (view instanceof ViewGroup) {
+      for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+        View innerView = ((ViewGroup) view).getChildAt(i);
+        setupUI(innerView);
+      }
+    }
+  }
+  //...
+
 
 }
 

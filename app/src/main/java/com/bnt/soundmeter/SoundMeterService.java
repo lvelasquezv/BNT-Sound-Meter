@@ -102,7 +102,7 @@ public class SoundMeterService extends Service{
               while (runner != null && !runner.isInterrupted()) {
                 try {
                   Thread.sleep(1000);
-                  Log.i(TAG, "Tock");
+                  //Log.i(TAG, "Tock");
                 } catch (InterruptedException e) {
                   Log.d(TAG, "InterruptedException: " + android.util.Log.getStackTraceString(e));
                 }
@@ -274,7 +274,7 @@ public class SoundMeterService extends Service{
   //https://acousticstoday.org/wp-content/uploads/2017/06/2-faber.pdf
   public void soundDb(double ampl){
     double p = getAmplitude();
-    Log.d("SoundDb", "Max Amplitude of recorder = " + p + " / reference sound pressure = " + ampl);
+    //Log.d("SoundDb", "Max Amplitude of recorder = " + p + " / reference sound pressure = " + ampl);
     double splDb = MAX_REPORTABLE_DB  + 20 * Math.log10(p / ampl);
     intent.putExtra(EXTRA_SPLDB, splDb);
   }
@@ -329,7 +329,7 @@ public class SoundMeterService extends Service{
   public void bufferToCalculate(short[] ...buffer){
     float freq = calculate(RECORDER_SAMPLERATE, buffer[0]);
     intent.putExtra(EXTRA_FREQ, freq);
-    Log.d(TAG,"FREQUENCIES = " + freq);
+    //Log.d(TAG,"FREQUENCIES = " + freq);
   }
 
 

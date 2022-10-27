@@ -35,7 +35,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Si desea enviar el número de eventos a la base de datos, por favor ingrese su número de identificación y de clic en 'ENVIAR', de lo contrario de clic en 'CANCELAR'. Nota: su número de identificación será cifrado y solo será usado para fines del estudio del sueño"
+        android:text="Si desea enviar el total de eventos a la base de datos, por favor ingrese su número de identificación y de clic en 'ENVIAR', de lo contrario de clic en 'CANCELAR'. Nota: su número de identificación será cifrado y solo será usado para fines del estudio del sueño"
         style="@style/TextStyle18">
     </TextView>
     <EditText
@@ -47,7 +47,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
         android:autofillHints=""
-        android:hint="Cedula de Ciudadania"
+        android:hint="Cédula de Ciudadanía"
         android:importantForAutofill="yes"
         android:inputType="number"
         android:minHeight="48dp"

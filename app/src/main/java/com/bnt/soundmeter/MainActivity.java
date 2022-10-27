@@ -421,7 +421,9 @@ public class MainActivity extends AppCompatActivity {
    */
 
   public void readLimit(){
-
+    if(etLimite.getText().toString() == null || etLimite.getText().toString().isEmpty()){
+      etLimite.setText("50");
+    }
     limite = Double.parseDouble(etLimite.getText().toString());
   }
 
@@ -440,6 +442,9 @@ public class MainActivity extends AppCompatActivity {
   //DETENER
   public void smsPause(View view) {
     Log.d(TAG, "Boton Pause");
+    smsPauseNonB();
+  }
+  public void smsPauseNonB(){
     stopSMS();
     stopMainThread();
 
@@ -453,7 +458,6 @@ public class MainActivity extends AppCompatActivity {
     Log.d(TAG, "Boton Borrar");
     borrarRegistro();
   }
-
   public void borrarRegistro(){
     evento = 0;
     historiaEvento = null;
@@ -463,12 +467,11 @@ public class MainActivity extends AppCompatActivity {
   //ENVIAR & SALIR
   public void buttonSend(View view){
     //PAUSAR
-    stopSMS();
-    stopMainThread();
+    smsPauseNonB();
+    //BORRAR
+    borrarRegistro();
     //ENVIAR DATOS A FIREBASE
     askForID();
-    //BORRAR REGISTROS
-    borrarRegistro();
   }
 
   //SALIR
@@ -549,8 +552,7 @@ public class MainActivity extends AppCompatActivity {
       .setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int id) {
           Log.d("ALERT DIALOG", "CANCEL");
-          //SALIR DE LA APP
-          detenerApp();
+          //ENVIAR APP A BACKGROUND
           moveTaskToBack(true);
         }
       });
@@ -581,8 +583,7 @@ public class MainActivity extends AppCompatActivity {
     }else{
       Log.d("FIREBASE", "SIN DATOS PARA EL ENVIO");
     }
-    //SALIR DE LA APP
-    detenerApp();
+    //ENVIAR APP A BACKGROUND
     moveTaskToBack(true);
   }
 
